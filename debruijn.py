@@ -1,6 +1,5 @@
 import sys
 from time import time
-from constants import width, height
 from Tkinter import Scale,Tk,Canvas,HORIZONTAL,FLAT,LEFT,RIGHT,CENTER
 import random
 import math
@@ -9,6 +8,10 @@ fileIndex = 1
 kIndex = 2
 
 kInput = None
+
+width=1000
+height=700
+
 
 SPRING_CONSTANT = 0.01
 COULOMB_CONSTANT = 0.01
