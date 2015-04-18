@@ -19,10 +19,10 @@ DECAY_CONSTANT = 1.0
 
 
 root = Tk()
-timeInput = Scale(root, from_=1, to=1000,orient=HORIZONTAL,label="Time",relief = FLAT)
+timeInput = Scale(root, from_=1, to=500,orient=HORIZONTAL,label="Time",relief = FLAT)
 springInput = Scale(root, from_=1, to=1000,orient=HORIZONTAL,label="Spring",relief = FLAT)
 coulombInput = Scale(root, from_=1, to=1000,orient=HORIZONTAL,label="Coulomb",relief = FLAT)
-decayInput = Scale(root, from_=1, to=1000,orient=HORIZONTAL,label="Decay",relief = FLAT)
+decayInput = Scale(root, from_=0, to=100,orient=HORIZONTAL,label="Decay",relief = FLAT)
 
 timeInput.set(100)
 springInput.set(250)
@@ -31,19 +31,74 @@ decayInput.set(90)
 
 canvas = Canvas(width=width, height=height, bg="#f0f0f0")
 canvas.pack(fill = "both", expand = 1, padx=50)
+
+
 timeInput.pack(side=LEFT, padx=50, pady=10)
 springInput.pack(side=LEFT, padx=50, pady=10)
 coulombInput.pack(side=LEFT, padx=50, pady=10)
 decayInput.pack(side=LEFT, padx=50, pady=10)
 
-RADIUS = 4
+RADIUS = 5
 
 
 
-DEBUG = True
-#Note: functions are _ seperated, variables are cammel case
+def distance(x,y, coords):
+    x0, y0, x1, y1 = coords
+    x2 = (x0 + x1) / 2.0
+    y2 = (y0 + y1) / 2.0
+    return ( (x - x2)**2 + (y - y2)**2 ) ** 0.5
 
 
+def loc_from_coords(coords):
+    
+    return (x1 + x2) // 2, (y1 + y2) // 2
+
+
+DRAGITEM  = None
+DRAGITEMX = 0
+DRAGITEMY = 0
+
+def OnTokenButtonPress(event):
+    global DRAGITEM
+    global DRAGITEMX
+    global DRAGITEMY
+    # record the item and its location
+    nodes = canvas.find_withtag("fdlnode") 
+    closest = sorted([(node,distance(event.x,event.y,canvas.coords(node))) for node in nodes], key=lambda x:x[1])[:1]
+    DRAGITEM = closest[0][0]
+    DRAGITEMX = event.x
+    DRAGITEMY = event.y
+ 
+def OnTokenButtonRelease(event):
+    global DRAGITEM
+    global DRAGITEMX
+    global DRAGITEMY
+    # reset the drag information
+    DRAGITEM = None
+    DRAGITEMX = 0
+    DRAGITEMY = 0
+ 
+def OnTokenMotion(event):
+    global DRAGITEM
+    global DRAGITEMX
+    global DRAGITEMY
+    # compute how much this object has moved
+    delta_x = event.x - DRAGITEMX
+    delta_y = event.y - DRAGITEMY
+    # move the object the appropriate amount
+    canvas.move(DRAGITEM, delta_x, delta_y)
+    # record the new position
+    DRAGITEMX = event.x
+    DRAGITEMY = event.y
+
+
+canvas.tag_bind("token", "<ButtonPress-1>", OnTokenButtonPress)
+canvas.tag_bind("token", "<ButtonRelease-1>", OnTokenButtonRelease)
+canvas.tag_bind("token", "<B1-Motion>", OnTokenMotion)
+
+
+def isDragged(node):
+    return DRAGITEM and DRAGITEM == node._index
 
 
 class fdlNode(object):
@@ -62,7 +117,7 @@ class fdlNode(object):
         self.x, self.y = x, y
         self._canvas = canv
         coord = (self.x)-self.r, (self.y)-self.r, (self.x)+self.r, (self.y)+self.r
-        self._index = canv.create_oval(coord, fill=color)
+        self._index = canv.create_oval(coord, fill=color,tags=("token","fdlnode"))
         self._vx = 0
         self._vy = 0
 
@@ -74,6 +129,8 @@ class fdlNode(object):
         return s
 
     def addForce(self,node):
+        if isDragged(self) or isDragged(node):
+            return 
         dx = (node.x - self.x) 
         dx = dx if abs(dx) >= 1 else 1.0
         dy = (node.y - self.y)
@@ -109,7 +166,6 @@ class fdlNode(object):
         self.__fy += WALL_CONSTANT * COULOMB_CONSTANT / d2 # Bottom Wall force
         self.__fx += WALL_CONSTANT * COULOMB_CONSTANT / d3 # Left Wall force
         self.__fx += WALL_CONSTANT * COULOMB_CONSTANT / d4 # Right Wall force
-
         self.__fx *= DECAY_CONSTANT
         self.__fy *= DECAY_CONSTANT
         ax = self.__fx / self.mass
@@ -144,8 +200,8 @@ class fdlNode(object):
             self._vy *= -1
         dx = self._vx * TIME_CONSTANT
         dy = self._vy * TIME_CONSTANT
-
-        self._canvas.move(self._index, dx, dy)
+        if not isDragged(self):
+            self._canvas.move(self._index, dx, dy)
         tempX1, tempY1, tempX2, tempY2 = self._canvas.coords(self._index)
         self.x = tempX1 + self.r
         self.y = tempY1 + self.r
