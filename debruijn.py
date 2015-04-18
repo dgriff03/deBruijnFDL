@@ -263,7 +263,7 @@ def main():
     for n in fdlNodes:
         x = int( random.random() * width  )
         y = int( random.random() * height  )
-        n.addCanvas(canvas, x, y, 1, "green")
+        n.addCanvas(canvas, x, y, 1, 1, "green")
     FDL(fdlNodes)
 
 if __name__ == "__main__":

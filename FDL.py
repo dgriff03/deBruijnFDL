@@ -4,12 +4,19 @@ from constants import width, height
 
 
 root = Tk()
-timeInput = Scale(root, from_=1, to=10,orient=HORIZONTAL,label="Time",relief = FLAT)
-forceInput = Scale(root, from_=1, to=10,orient=HORIZONTAL,label="Force",relief = FLAT)
+timeInput = Scale(root, from_=1, to=100,orient=HORIZONTAL,label="Time",relief = FLAT)
+forceInput = Scale(root, from_=1, to=100,orient=HORIZONTAL,label="Force",relief = FLAT)
+decayInput = Scale(root, from_=1, to=100,orient=HORIZONTAL,label="Decay",relief = FLAT)
+
+timeInput.set(10)
+forceInput.set(50)
+decayInput.set(90)
+
 canvas = Canvas(width=width, height=height, bg="#f0f0f0")
 canvas.pack(fill = "both", expand = 1, padx=50)
 timeInput.pack(side=LEFT, padx=50, pady=10)
 forceInput.pack(side=LEFT, padx=50, pady=10)
+decayInput.pack(side=LEFT, padx=50, pady=10)
 
 RADIUS = 5
 
@@ -22,13 +29,14 @@ class fdlNode(object):
         self.branch = False #Used for de Bruijn Graph methods
 
 
-    def addCanvas(self,canv, x, y,t, color):
+    def addCanvas(self,canv, x, y,t, mass, color):
         self.x, self.y = x, y
         self._canvas = canv
+        self.mass = mass
         coord = (self.x)-RADIUS, (self.y)-RADIUS, (self.x)+RADIUS, (self.y)+RADIUS
         self._index = canv.create_oval(coord, fill=color)
-        self._vx = 5
-        self._vy = 5
+        self._vx = 0
+        self._vy = 0
         self._t = t
 
     
@@ -77,7 +85,7 @@ def move_nodes(nodes, lines, root):
         n1 = line[1]
         n2 = line[2]
         canvas.coords( lid, n1.x, n1.y, n2.x, n2.y  )
-    root.after(timeInput.get() * 10, lambda: move_nodes(nodes, lines, root))
+    root.after(timeInput.get() , lambda: move_nodes(nodes, lines, root))
 
 
 def getCanvas():
