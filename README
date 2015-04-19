@@ -1,0 +1,90 @@
+Daniel Griffin
+Tufts University - Comp 167
+
+Final Project -- An Independent Research Project
+
+Project Report
+
+Problem Description
+--------------------
+During sequence assembly using the de Bruijn graph method it is hard to image
+the affect of changing the size of k on the graph although the theory is
+clear. Furthermore, it is hard to predict the assembly of the sequence after
+branching nodes and discover which aspects of the graph are due to read
+error. Although there are algorithms in place to determine these factors, at
+times human interpretation can more easily interpret the results if a proper
+visualization is prepared.
+
+
+Solution
+---------
+The implemented solution is a force directed layout of the de Bruijn graph.
+This implementation allows for nodes in the graph to be manually
+manipulated through dragging and highlights key features. Further manipulation
+is allowed through sliders. The sliders allow for quick changes in the coulomb
+force, spring force, time constant and force decay factor. There is an
+additional slider to manipulate the k of the de Bruijn graph displayed but is
+a slow change as it must calculate the new de Bruijn graph. The coverage of a
+node is inidicated relative to other coverages. This is done by normalizing
+all coverages assuming a normal distribution. The size of a node is indicative
+of its coverage such that a larger node has a higher coverage than a smaller
+node. A nodes color is indicitive of its branching property considering an
+undirected graph. A node is blue if it is a starting node, that is it only has
+one connection. A node is green if it is intermediate, that is it has exactly
+two connections. A node is red if it is a branch node, meaning it has three or
+more connections.
+
+Results
+--------
+First, it is important to note that this methodology does not address direction
+in regards to node connection. Although this may be important in sequence
+reconstruction it was not believed to be important in this examination. For
+applications that have the end goal of sequence reconstruction, this
+application is likely unsuitable or would need to be modified to keep track of
+the direction of these connections seperately. There are also serveral areas of
+this application which could be improved both in terms of efficiency and
+overall functionality; however, these points will be explored in the Future
+Work section. This application does allow for the effect of differing k values
+to be easily and intuitively examined as well as allow easy exploration of the
+shape of the de Bruijn graph for small sequences. In its current state this
+application is best suited as an educational tool to allow explination
+of how a sequence can be determined from a de Bruijn graph as well as the
+different node types that will be encountered. Finally, it can help to
+demonstrate the advantages and disadvantages of using different k values.
+
+Future Work
+------------
+There are several improvements that could be added to this project.
+The first would be to allow the kmer of a node to be displayed to the user
+at the bottom of the screen in a text box when highlighting a node. This would
+allow a user to explore which subsequences were important to the structure of
+the graph. Next, the current methodology has several efficiency flaws that
+could be fixed. One example of this is that previously calculated graphs for
+a given k should be cached and reused when returned to instead of recalculating
+the entire de Bruijn graph for that k value. Next, in order to allow for
+larger sequences to be examined, the intermediate nodes should be collapsed in
+an intuitive manner to shink the number of nodes that require force
+calculations. Furthermore, this would allow for easy examination of more
+interesting nodes such as starts and branches with less clutter. However, this
+feauture would need to allow for examination of the contained nodes for it to
+be truly useful. Finally, it would be useful to be able to enter a known contig
+(or perhaps calculate all contigs and allow selection) and have the nodes
+contained in the contig highlighed.
+
+How to Use
+-----------
+python debruijn.py sequence_file K
+
+The sequence file must be a list of endline character terminated sequences.
+
+K needs to be an integer value greater than 2
+
+The project requires only core python libraries and the Tkinter library which
+is typically natively available.
+
+Sliders work by clicking on the pointer and sliding to the desired value.
+Nodes can be moved by clicking on them, holding and moving the mouse and 
+releasing when the desired location is desired. It is recommended to move
+the decay value to 0 or a low number when it is desired to move multiple
+nodes as it will limit undesired motion during the process.
+
